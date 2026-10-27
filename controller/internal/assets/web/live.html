@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LiveTT · Ao vivo</title><link rel="stylesheet" href="/live.css"></head>
+<body>
+<main id="app" data-state="idle">
+  <header class="top">
+    <div class="badge" id="badge"><span class="dot"></span><span id="badgeText">Offline</span></div>
+    <div class="clock" id="clock" title="Tempo de LIVE"></div>
+  </header>
+  <section class="stats" id="stats" aria-label="Estatísticas"></section>
+  <section class="chat" aria-label="Chat">
+    <div class="empty" id="empty">
+      <div class="pulse"></div>
+      <p id="emptyText">Aguardando a LIVE começar…</p>
+    </div>
+    <ol id="feed" aria-live="polite"></ol>
+    <button id="more" class="more" hidden>Novas mensagens ↓</button>
+  </section>
+  <form class="send" id="send" autocomplete="off">
+    <div class="sendrow">
+      <input id="msg" type="text" maxlength="200" placeholder="Responder no chat da LIVE…" aria-label="Mensagem para o chat" disabled>
+      <button id="go" type="submit" disabled>Enviar</button>
+    </div>
+    <div class="sendnote" id="note" role="status"></div>
+  </form>
+</main>
+<script src="/live.js"></script>
+</body></html>

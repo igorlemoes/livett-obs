@@ -1,0 +1,116 @@
+LiveTT — versão {{VERSION}}
+==========================================
+
+AVISO IMPORTANTE (leia antes de instalar)
+-----------------------------------------
+Esta ferramenta é INDEPENDENTE e NÃO OFICIAL e PODE VIOLAR os Termos de Serviço do TikTok. Ela usa serviços internos e não documentados do TikTok, a partir
+da sua sessão no Chrome. Isso pode levar à restrição, suspensão ou banimento da sua
+conta, e pode parar de funcionar a qualquer momento. O risco é seu: teste primeiro com uma conta que você aceite perder. Detalhes: docs\RISCOS.md.
+
+O que é
+-------
+Um plugin para o OBS Studio que transmite para o TikTok LIVE sem precisar do TikTok LIVE Studio aberto: o botão
+"Iniciar transmissão" do próprio OBS abre uma janela (conta, título, duração) e cria a sala; o plugin encerra
+sozinho se o TikTok sinalizar término ou aviso, lê o chat e as estatísticas, deixa você responder no chat e oferece
+um servidor MCP para um assistente de IA operar tudo.
+
+Requisitos
+----------
+- Windows 10/11 (64 bits) e OBS Studio 32.x (64 bits). Testado com o 32.2.2.
+- Google Chrome instalado. O plugin usa uma cópia própria do Chrome (perfil separado) para falar com o TikTok.
+- Nada para configurar no OBS: sem servidor WebSocket, porta ou senha.
+
+Instalação mais fácil
+---------------------
+1. Feche o OBS.
+2. Extraia o zip inteiro (clique direito > Extrair tudo) e dê duplo clique em Instalar.cmd.
+   Ele pede permissão de administrador, copia para o lugar certo, preserva seus dados e remove uma cópia
+   colocada por engano em "Program Files".
+
+Instalação manual (sem o instalador)
+------------------------------------
+1. Feche o OBS.
+2. Copie a pasta "livett" deste zip para dentro de:
+
+       C:\ProgramData\obs-studio\plugins\
+
+   (a pasta ProgramData é oculta: cole o caminho acima na barra de endereços do Explorer.)
+   O resultado deve ser:
+       C:\ProgramData\obs-studio\plugins\livett\bin\64bit\livett.dll
+       C:\ProgramData\obs-studio\plugins\livett\data\controller\controller.exe
+3. Abra o OBS. O painel "LiveTT" aparece à direita (se não, menu Painéis > LiveTT).
+
+ATENÇÃO: NÃO coloque a pasta em C:\Program Files\obs-studio\obs-plugins\ — o OBS 32 não a carrega de lá, e o
+plugin não aparece em nenhum lugar.
+
+Primeiro uso
+------------
+1. O painel conecta sozinho ao OBS e ao TikTok. Se pedir "Entrar no TikTok", entre na janela que abrir (QR, e-mail ou
+   telefone); ao entrar, ela some sozinha. Sua senha nunca passa pelo plugin.
+2. Confira a cena e o áudio e clique em "Iniciar transmissão" do OBS (ou em "Iniciar LIVE" no painel). Na janela,
+   escolha título e duração e confirme: isso PUBLICA uma LIVE de verdade na sua conta. Cancelar não faz nada.
+3. Encerre com "Encerrar LIVE" no painel (ou "Parar transmissão" do OBS).
+4. Várias contas: o avatar no canto do painel abre o menu (usar outra conta, adicionar, sair).
+5. Para voltar ao OBS puro, desative o plugin em Ferramentas/Plugins do OBS ou apague a pasta.
+
+Assistente de IA (MCP) — Claude Code, Codex, opencode, Cursor, DeepSeek e outros
+--------------------------------------------------------------------------------
+O controller.exe também é um servidor MCP padrão (stdio, JSON-RPC), sem conta nem chave. Qualquer cliente MCP serve; modelos
+sem cliente próprio (DeepSeek, Qwen...) funcionam por um cliente como opencode, Cline, Continue ou Cursor.
+O jeito mais fácil: no painel, seção "Assistente de IA", clique no botão do seu assistente (copia a configuração pronta)
+e, por último, em "Guia para o agente" e cole no chat.
+
+Configuração manual (caminhos do pacote instalado; se instalou em outro lugar, ajuste):
+
+  Claude Code:
+    claude mcp add --scope user livett -- "C:\ProgramData\obs-studio\plugins\livett\data\controller\controller.exe" mcp --root "C:\ProgramData\obs-studio\plugins\livett\data\controller"
+
+  Codex:
+    codex mcp add livett -- "C:\ProgramData\obs-studio\plugins\livett\data\controller\controller.exe" mcp --root "C:\ProgramData\obs-studio\plugins\livett\data\controller"
+
+  opencode (opencode.json):
+    { "mcp": { "livett": { "type": "local", "enabled": true, "command": [
+        "C:\\ProgramData\\obs-studio\\plugins\\livett\\data\\controller\\controller.exe",
+        "mcp", "--root", "C:\\ProgramData\\obs-studio\\plugins\\livett\\data\\controller" ] } } }
+
+  Cursor, Cline, Continue, Claude Desktop e outros (JSON de MCP):
+    { "mcpServers": { "livett": {
+        "command": "C:\\ProgramData\\obs-studio\\plugins\\livett\\data\\controller\\controller.exe",
+        "args": ["mcp", "--root", "C:\\ProgramData\\obs-studio\\plugins\\livett\\data\\controller"] } } }
+
+Teste sem IA (só leitura, não publica nada): clique com o botão direito em Testar-MCP.ps1 > Executar com PowerShell
+(com o OBS aberto). Ele lista as 17 ferramentas e mostra o estado.
+
+Regras do assistente: nunca publica uma LIVE sem pedido explícito seu naquele momento, só escreve no chat o texto
+que você aprovou e só encerra quando você mandar. Guia completo na pasta docs\ (MCP.md, SEGURANCA.md, OPERACAO.md, AGENTS.md).
+
+Câmera do celular (sem fio, sem instalar nada no celular)
+---------------------------------------------------------
+Celular e computador na mesma rede Wi-Fi. Nada para instalar quando o plugin usa o servidor da câmera do projeto (o celular abre uma página segura, sem aviso). Se esse
+servidor não estiver disponível, o plugin tenta o cloudflared (PowerShell: winget install Cloudflare.cloudflared) e, sem ele, a rede local com aviso de certificado
+(o iPhone costuma recusar a câmera nesse modo).
+No OBS: Fontes > + > "Câmera do celular (LiveTT)". Uma janela mostra o QR code: aponte a câmera do celular, toque em "Iniciar câmera" na página
+que abrir e pronto (imagem e som). O mesmo QR também está no painel "LiveTT", em "Câmera do celular", junto de "Adicionar na cena", "Novo código"
+e "Parar de aceitar". Faça isso antes da LIVE (durante ela o painel recusa criar a fonte). Segurança e detalhes: docs\OPERACAO.md §4.2 e docs\SEGURANCA.md.
+
+Dados e privacidade
+-------------------
+Tudo fica no seu computador: data\controller\runtime (diário, registros com segredos mascarados, contas salvas e
+protegidas pelo Windows) e o perfil do Chrome em %LOCALAPPDATA%\TikTokLiveOBS. Nada é enviado a terceiros.
+
+Atualizar e remover
+-------------------
+Atualizar: feche o OBS e rode Instalar.cmd da nova versão (seus dados são preservados).
+Remover: Instalar.cmd /remover (ou apague a pasta livett e, se quiser, %LOCALAPPDATA%\TikTokLiveOBS).
+
+Avisos
+------
+- Os arquivos não têm assinatura digital: o Windows pode mostrar um aviso na primeira execução.
+- Projeto independente, sem vínculo com o TikTok ou a ByteDance. Uso por sua conta e risco; respeite os termos do TikTok.
+- Limitação conhecida: mensagens enviadas ao chat pelo anfitrião são aceitas pelo TikTok, mas ainda não confirmamos
+  que aparecem para os espectadores.
+
+Código-fonte completo (exigência da GPL): https://github.com/igorlemoes/livett-obs
+
+Licença: GNU GPL versão 2 ou posterior (arquivo LICENSE do projeto; texto também em https://www.gnu.org/licenses/old-licenses/gpl-2.0.html). Sem garantia.
+Desenvolvido por Igor Lemões

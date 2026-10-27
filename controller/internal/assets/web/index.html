@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="panel-token" content="__PANEL_TOKEN__"><title>LiveTT · OBS</title><link rel="stylesheet" href="/style.css"></head>
+<body>
+<svg class="sprite" width="0" height="0" aria-hidden="true"><defs>
+<symbol id="i-play" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></symbol>
+<symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
+<symbol id="i-video" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></symbol>
+<symbol id="i-layers" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+<symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+<symbol id="i-bot" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></symbol>
+<symbol id="i-bag" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+<symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></symbol>
+<symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+</defs></svg>
+
+<main id="app" data-phase="disconnected">
+<header class="top">
+  <div class="brand"><span class="mark"><svg class="ic"><use href="#i-video"/></svg></span><div><b>LiveTT</b><small>no OBS</small></div></div>
+  <div class="right">
+    <span id="badge" class="pill">Desconectado</span>
+    <div class="acct">
+      <button id="acctBtn" class="avatarBtn" aria-haspopup="menu" aria-expanded="false" title="Contas"><span id="acctAvatar" class="avatar">?</span><svg class="ic sm"><use href="#i-chev"/></svg></button>
+      <div id="acctMenu" class="menu" role="menu" hidden>
+        <div class="menuHead"><span id="menuAvatar" class="avatar big">?</span><div><b id="menuName">Nenhuma conta</b><small id="menuHandle"></small></div></div>
+        <ul id="accounts" class="menuList"></ul>
+        <button id="addAccount" class="menuItem" role="menuitem"><svg class="ic"><use href="#i-plus"/></svg>Adicionar conta</button>
+        <button id="logout" class="menuItem out" role="menuitem"><svg class="ic"><use href="#i-logout"/></svg>Sair desta conta</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="status" aria-live="polite"><span id="spin" class="spin" hidden></span><p id="statusText">Conectando…</p><button id="connect" class="ghost" hidden><svg class="ic"><use href="#i-refresh"/></svg>Conectar</button></section>
+<section id="error" class="error" hidden role="alert"></section>
+
+<section class="card list" id="aboutCard">
+  <details id="aboutBox"><summary><svg class="ic"><use href="#i-user"/></svg>Sobre mim <small>texto da sua conta</small></summary>
+    <textarea id="aboutText" maxlength="240" rows="3" autocomplete="off" placeholder="Conecte para carregar"></textarea>
+    <div class="row end"><button id="aboutSave" class="ghost" disabled>Salvar</button></div>
+    <p class="hint">Altera o texto na sua conta TikTok (o mesmo do app do TikTok); pode passar por moderação.</p></details>
+</section>
+
+<section class="card" id="setup">
+  <h2><svg class="ic"><use href="#i-video"/></svg>Iniciar uma LIVE</h2>
+  <p class="hint tight">Abre a janela de início (a mesma do botão <b>Iniciar transmissão</b> do OBS): título e duração. Nada é publicado antes de você confirmar lá.</p>
+  <button id="start" class="primary" disabled><svg class="ic"><use href="#i-play"/></svg>Iniciar LIVE</button>
+</section>
+
+<section class="card onair" id="onair" hidden>
+  <div class="row"><span class="dot"></span><b id="liveTitle">LIVE</b></div>
+  <div class="metrics"><div><small>No ar há</small><b id="elapsed">0:00</b></div><div><small>Encerra em</small><b id="remaining">sem limite</b></div><div><small>Agora</small><b id="viewers">–</b></div></div>
+  <button id="end" class="danger" disabled><svg class="ic"><use href="#i-stop"/></svg>Encerrar LIVE</button>
+  <p class="hint" id="guard"></p>
+  <iframe id="liveView" class="liveView" title="Estatísticas e chat ao vivo" src="about:blank"></iframe>
+</section>
+
+<section class="card list">
+  <details id="aiBox" open><summary><svg class="ic"><use href="#i-bot"/></svg>Assistente de IA <small>contexto e conexão</small></summary>
+    <label for="products">Contexto para IA</label>
+    <textarea id="products" maxlength="2000" rows="5" placeholder="Ex.: Camiseta R$ 59, tamanhos P ao GG, entrega em 5 dias úteis. Ou: gameplay de Free Fire, ranking Mestre, hoje enfrentando squads." autocomplete="off"></textarea>
+    <p class="hint">O assistente usa isto para responder os espectadores durante esta LIVE. Informe mais detalhes sobre seus produtos (preço, tamanhos, prazo de entrega, etc.), sua gameplay, batalhas, etc. O texto fica salvo e vai com a próxima LIVE; durante uma LIVE, <b>Atualizar na LIVE</b> coloca a mudança no ar.</p>
+    <div class="row end"><button id="ctxSave" class="ghost" disabled>Salvar contexto</button></div>
+    <label class="switch"><input type="checkbox" id="autoThanks"><span class="track"></span><span class="txt">Agradecer sozinho presentes, seguidores, compartilhamentos e entradas no clube de fãs</span></label>
+    <label class="switch"><input type="checkbox" id="autoAnswers"><span class="track"></span><span class="txt">Responder sozinho dúvidas dos espectadores com base no contexto</span></label>
+    <p class="hint" id="aiHint">Os interruptores só ligam durante a LIVE e valem só para ela. Sem eles, o assistente só envia mensagens que você aprovar.</p>
+    <h4>Conectar um assistente</h4>
+    <div class="btnrow">
+      <button class="ghost" data-copy="claudeCode"><svg class="ic"><use href="#i-link"/></svg><span>Claude Code</span></button>
+      <button class="ghost" data-copy="codex"><svg class="ic"><use href="#i-link"/></svg><span>Codex</span></button>
+      <button class="ghost" data-copy="opencode"><svg class="ic"><use href="#i-link"/></svg><span>opencode</span></button>
+      <button class="ghost" data-copy="json"><svg class="ic"><use href="#i-link"/></svg><span>Cursor e outros</span></button>
+      <button class="ghost" data-copy="guide"><svg class="ic"><use href="#i-user"/></svg><span>Guia para o agente</span></button>
+    </div>
+    <p class="hint">Cada botão copia a configuração pronta para esta instalação. Cole no terminal (Claude Code, Codex) ou nas configurações de MCP (Cursor e outros) e, por último, cole o guia no chat do assistente.</p>
+    <details class="inline"><summary>Mais opções</summary>
+      <label for="moreCfg">Codex: arquivo config.toml</label><textarea id="moreCfg" rows="4" readonly></textarea>
+      <p class="hint">Se o botão não copiar, selecione o texto acima. Detalhes em docs/MCP.md.</p></details></details>
+  <details id="camBox" hidden><summary><svg class="ic"><use href="#i-video"/></svg>Câmera do celular <small>sem fio, pelo navegador</small></summary>
+    <p class="hint">Use o celular como câmera do OBS sem instalar nada nele: ele abre uma página, envia imagem e som pelo Wi-Fi e o OBS recebe numa fonte de navegador. O celular e este computador precisam estar na mesma rede.</p>
+    <div id="camPair" hidden>
+      <img id="camQr" class="camQr" alt="QR code para abrir a câmera no celular" width="200" height="200">
+      <p class="hint" id="camQrHint">Aponte a câmera do celular para o código.</p>
+      <label class="field" id="camIpBox" hidden><svg class="ic"><use href="#i-link"/></svg><select id="camIp" aria-label="Endereço deste computador na rede"></select></label>
+    </div>
+    <div id="camList" class="camList"></div>
+    <div id="camPair" hidden>
+      <p class="hint" id="camPairTitle"></p>
+      <img id="camQr" class="camQr" alt="QR code para abrir a câmera no celular" width="200" height="200">
+      <p class="hint" id="camQrHint">Aponte a câmera do celular para o código.</p>
+      <label class="field" id="camIpBox" hidden><svg class="ic"><use href="#i-link"/></svg><select id="camIp" aria-label="Endereço deste computador na rede"></select></label>
+    </div>
+    <p class="hint" id="camStatus"></p>
+    <p class="hint" id="camNote" hidden></p>
+    <div class="row end" id="camCopyRow" hidden><button id="camCopy" class="ghost"><svg class="ic"><use href="#i-link"/></svg><span>Copiar comando de instalação</span></button></div>
+    <div class="btnrow">
+      <button id="camAdd" class="ghost"><svg class="ic"><use href="#i-plus"/></svg><span>Adicionar câmera na cena</span></button>
+    </div></details>
+  <details id="safetyBox"><summary><svg class="ic"><use href="#i-shield"/></svg>Segurança</summary>
+    <label class="switch"><input type="checkbox" id="autoEnd" checked><span class="track"></span><span class="txt">Encerrar a LIVE automaticamente se o TikTok enviar um aviso (o término da sala sempre encerra)</span></label>
+    <p class="hint" id="monitor"></p></details>
+</section>
+<footer>Desenvolvido por Igor Lemões</footer>
+</main>
+
+<div id="modal" class="modal" hidden><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dlgTitle">
+  <h3 id="dlgTitle"></h3><dl id="dlgFacts"></dl><p id="dlgNote" class="hint"></p>
+  <div class="dlgActions"><button id="dlgCancel" class="ghost">Cancelar</button><button id="dlgOk" class="primary"></button></div></div></div>
+<script src="/app.js"></script></body></html>

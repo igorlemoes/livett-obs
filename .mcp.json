@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "livett": {
+      "command": "C:\\ProgramData\\obs-studio\\plugins\\livett\\data\\controller\\controller.exe",
+      "args": ["mcp", "--root", "C:\\ProgramData\\obs-studio\\plugins\\livett\\data\\controller"]
+    }
+  }
+}

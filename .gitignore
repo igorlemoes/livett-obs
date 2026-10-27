@@ -1,0 +1,19 @@
+# dados locais e artefatos (nunca versionar)
+runtime/
+work/
+dist/
+
+# build do plugin nativo (dependências baixadas ~2 GB) e binários soltos
+plugin/build/
+plugin/build-deps/
+*.exe
+*.dll
+*.zip
+
+# ferramentas e caches locais
+
+# relay da câmera (worker): dependências e páginas copiadas (fonte: controller/internal/assets/camera)
+worker/node_modules/
+worker/.wrangler/
+worker/public/phone.html
+worker/public/s/

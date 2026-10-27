@@ -1,0 +1,62 @@
+AVISOS DE SOFTWARE DE TERCEIROS — LiveTT
+=======================================================
+
+Este projeto é software livre (GNU GPL v2 ou posterior, arquivo LICENSE). O pacote de instalação contém, além do código do
+projeto, apenas o que está listado abaixo. Nada do TikTok LIVE Studio, do TikTok ou da ByteDance é incluído.
+
+1) Linguagem Go (biblioteca padrão e runtime) — dentro do controller.exe
+   Licença BSD de 3 cláusulas. É obrigatório reproduzir o aviso abaixo em distribuições binárias.
+   O controlador não usa nenhum módulo de terceiros além da biblioteca padrão do Go (controller/go.mod não tem "require").
+
+2) OBS Studio (https://obsproject.com) — GNU GPL v2 ou posterior
+   O plugin (livett.dll) é carregado pelo OBS e usa as interfaces dele (libobs, obs-frontend-api e o plugin
+   obs-browser). O OBS não é distribuído neste pacote.
+
+3) Qt 6 (https://www.qt.io) — GNU LGPL v3
+   O plugin é ligado dinamicamente às bibliotecas Qt que o próprio OBS instala. Nenhuma biblioteca Qt é distribuída aqui.
+
+4) Google Chrome — programa do próprio usuário
+   O controlador usa o Chrome instalado no computador (perfil separado, só em %LOCALAPPDATA%\TikTokLiveOBS). Nada do Chrome é distribuído.
+
+5) cloudflared (https://github.com/cloudflare/cloudflared) — Apache License 2.0 — OPCIONAL
+   Se o usuário o instalar por conta própria, o controlador pode usá-lo para abrir um túnel HTTPS para a câmera do celular. Não é distribuído aqui.
+
+6) Cloudflare Workers (https://workers.cloudflare.com) — serviço de terceiros
+   O relay da câmera do celular (pasta worker/ do código-fonte) roda na plataforma da Cloudflare, sujeito aos termos dela.
+   Só mensagens de conexão passam por lá; o vídeo e o som não.
+
+7) Ferramentas de desenvolvimento do relay (apenas no repositório; não vão no pacote): wrangler/workerd/esbuild (Apache-2.0/MIT).
+
+Marcas: "TikTok" é marca da TikTok Ltd./ByteDance; "OBS" e "OBS Studio" são do OBS Project; "Cloudflare" é marca da Cloudflare, Inc.;
+"Chrome" é marca do Google LLC. Este projeto é independente e não tem vínculo, patrocínio ou aprovação de nenhuma delas.
+
+-----------------------------------------------------------------------------------------------------------------------
+Licença da linguagem Go (reprodução exigida):
+-----------------------------------------------------------------------------------------------------------------------
+Copyright 2009 The Go Authors.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google LLC nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

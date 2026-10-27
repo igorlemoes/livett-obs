@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<title>Câmera para o OBS</title>
+<link rel="stylesheet" href="/s/camera.css">
+</head>
+<body>
+<main>
+  <h1>Câmera para o OBS</h1>
+  <p class="sub">O vídeo vai direto deste celular para o computador, pela sua rede Wi-Fi.</p>
+
+  <div class="preview"><video id="preview" autoplay muted playsinline></video><span id="badge" class="badge" data-on="0">Parado</span></div>
+  <div id="status" class="status" role="status">Toque em <b>Iniciar câmera</b> e permita o uso da câmera e do microfone.</div>
+
+  <div class="row">
+    <div><label for="camera">Câmera</label><select id="camera"></select></div>
+    <div><label for="mic">Microfone</label><select id="mic"></select></div>
+  </div>
+  <div class="row">
+    <div><label for="quality">Qualidade</label><select id="quality">
+      <option value="720">720p (4 Mbps)</option>
+      <option value="1080" selected>1080p (8 Mbps)</option>
+      <option value="480">480p (2 Mbps)</option>
+    </select></div>
+    <div><label for="fps">Quadros por segundo</label><select id="fps">
+      <option value="24">24</option><option value="30" selected>30</option><option value="60">60</option>
+    </select></div>
+  </div>
+  <p id="sent" class="small" role="status"></p>
+  <div id="zoomBox" class="zoom" hidden><label for="zoom">Zoom <span id="zoomValue"></span></label><input id="zoom" type="range"></div>
+
+  <button id="start" class="primary">Iniciar câmera</button>
+  <button id="stop" class="stop" hidden>Parar</button>
+  <p class="small">Deixe esta página aberta e em primeiro plano; a tela é mantida acesa. A conexão só funciona com o celular na mesma rede Wi-Fi do computador. <span id="certNote">O aviso de certificado é do seu próprio computador: nada sai da sua rede.</span> O vídeo e o som vão direto para o computador.</p>
+</main>
+<script src="/s/phone.js"></script>
+</body>
+</html>

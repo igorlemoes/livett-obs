@@ -1,0 +1,15 @@
+﻿AVISO DE RISCO - LEIA ANTES DE INSTALAR
+
+O LiveTT e um projeto independente e NAO OFICIAL. Nao tem vinculo, patrocinio nem aprovacao do TikTok, da ByteDance, do OBS Project, da Cloudflare ou do Google.
+
+USAR ESTA FERRAMENTA PODE VIOLAR OS TERMOS DE SERVICO DO TIKTOK E PODE CUSTAR A SUA CONTA.
+
+- Ela nao usa uma API oficial: usa servicos internos e nao documentados do TikTok, a partir da sua propria sessao no Chrome.
+- Ela cria a sala da LIVE, mantem a LIVE no ar, le as mensagens da sua sala, pode enviar mensagens ao chat e encerrar a LIVE. Com um assistente de IA (MCP), parte disso pode ser feita por um programa.
+- Os Termos do TikTok (secao 5) proibem, entre outras coisas, engenharia reversa, uso de scripts automatizados para interagir com os servicos e a incorporacao dos servicos em outro programa.
+- Possiveis consequencias: restricao de recursos, suspensao ou banimento da conta (com perda de seguidores, presentes e ganhos), remocao da LIVE, e a ferramenta pode parar de funcionar a qualquer momento.
+- Nao ha garantia nem suporte. O RISCO E SEU. Teste primeiro com uma conta que voce aceite perder.
+
+O texto completo esta em docs\RISCOS.md (instalado junto com o plugin).
+
+Ao clicar em "Eu aceito o contrato" voce declara que leu este aviso e assume o risco de uso.
