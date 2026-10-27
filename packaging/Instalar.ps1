@@ -136,6 +136,12 @@ if ($keep) {
   Remove-Item $keep -Recurse -Force
 }
 Get-ChildItem $target -Recurse -File | Unblock-File -ErrorAction SilentlyContinue
+# O OBS roda como usuário comum: as pastas de dados precisam aceitar gravação (em ProgramData, quem instala como administrador as deixa só com leitura para os outros).
+foreach ($d in 'data\controller\runtime', 'data\controller\media') {
+  $p = Join-Path $target $d
+  New-Item -ItemType Directory -Force $p | Out-Null
+  icacls $p /grant '*S-1-5-32-545:(OI)(CI)M' /T /C /Q | Out-Null
+}
 if (Test-Path $oldTarget) { Remove-PluginFolder $oldTarget; Say "Versão anterior removida (o LiveTT usa a pasta '$name'): $oldTarget" }
 
 $exe = Join-Path $target 'data\controller\controller.exe'

@@ -54,6 +54,11 @@ Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdi
 ; Versão anterior (pasta obs-tiktok-live): leva as contas e os pareamentos, só se a pasta nova ainda não os tem.
 Source: "{code:OldRuntimeDir}\*"; DestDir: "{app}\data\controller\runtime"; Flags: external recursesubdirs createallsubdirs onlyifdoesntexist skipifsourcedoesntexist uninsneveruninstall; Check: NeedMigrate
 
+; O OBS e o controlador rodam como o usuário comum, que em ProgramData só cria arquivos novos: sem isto, quem instala como administrador deixa pastas onde o programa não consegue gravar ("Acesso negado").
+[Dirs]
+Name: "{app}\data\controller\runtime"; Permissions: users-modify
+Name: "{app}\data\controller\media"; Permissions: users-modify
+
 [Run]
 Filename: "{app}\LEIA-ME.txt"; Description: "Abrir o LEIA-ME"; Flags: postinstall shellexec skipifsilent unchecked
 
