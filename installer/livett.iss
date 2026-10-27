@@ -51,7 +51,8 @@ Name: "ptbr"; MessagesFile: "compiler:Languages\BrazilianPortuguese.isl"
 
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion
-Source: "migrar-antiga.ps1"; Flags: dontcopy
+; Versão anterior (pasta obs-tiktok-live): leva as contas e os pareamentos, só se a pasta nova ainda não os tem.
+Source: "{code:OldRuntimeDir}\*"; DestDir: "{app}\data\controller\runtime"; Flags: external recursesubdirs createallsubdirs onlyifdoesntexist skipifsourcedoesntexist uninsneveruninstall; Check: NeedMigrate
 
 [Run]
 Filename: "{app}\LEIA-ME.txt"; Description: "Abrir o LEIA-ME"; Flags: postinstall shellexec skipifsilent unchecked
@@ -78,18 +79,77 @@ begin
   end;
 end;
 
-// O ajudante (migrar-antiga.ps1) para o controlador do plugin, tira o que atrapalha a cópia e leva os dados de uma versão anterior.
-procedure RunHelper(const Phase: String);
-var
-  Script, NewDir, OldDir, Params: String;
-  Code: Integer;
+function OldDir: String;
 begin
-  ExtractTemporaryFile('migrar-antiga.ps1');
-  Script := ExpandConstant('{tmp}\migrar-antiga.ps1');
-  NewDir := RemoveBackslash(WizardDirValue);
-  OldDir := ExtractFilePath(NewDir) + 'obs-tiktok-live';
-  Params := '-NoProfile -ExecutionPolicy Bypass -File "' + Script + '" -Fase ' + Phase + ' -Novo "' + NewDir + '" -Antigo "' + OldDir + '"';
-  Exec(ExpandConstant('{sys}\WindowsPowerShell\v1.0\powershell.exe'), Params, '', SW_HIDE, ewWaitUntilTerminated, Code);
+  Result := ExtractFilePath(RemoveBackslash(ExpandConstant('{app}'))) + 'obs-tiktok-live';
+end;
+
+function OldRuntimeDir(Param: String): String;
+begin
+  Result := OldDir + '\data\controller\runtime';
+end;
+
+function NeedMigrate: Boolean;
+begin
+  Result := DirExists(OldRuntimeDir('')) and not DirExists(ExpandConstant('{app}\data\controller\runtime'));
+end;
+
+// Mode 0: apaga os restos .old. Mode 1: renomeia os programas (exe/dll) para .old, porque um programa em uso pode ser renomeado, mas não apagado.
+procedure Sweep(const Dir: String; Mode: Integer);
+var
+  R: TFindRec;
+  Path, Ext: String;
+begin
+  if not DirExists(Dir) then Exit;
+  if FindFirst(Dir + '\*', R) then begin
+    try
+      repeat
+        if (R.Name <> '.') and (R.Name <> '..') then begin
+          Path := Dir + '\' + R.Name;
+          Ext := Lowercase(ExtractFileExt(R.Name));
+          if R.Attributes and FILE_ATTRIBUTE_DIRECTORY <> 0 then
+            Sweep(Path, Mode)
+          else if Mode = 0 then begin
+            if Ext = '.old' then DeleteFile(Path);
+          end else if ((Ext = '.exe') or (Ext = '.dll')) and (Pos('unins', Lowercase(R.Name)) <> 1) then
+            RenameFile(Path, Path + '.old');
+        end;
+      until not FindNext(R);
+    finally
+      FindClose(R);
+    end;
+  end;
+end;
+
+// Encerra só o painel do controlador (nunca o vigia de uma LIVE, o MCP de um assistente de IA nem o assistente de login).
+procedure StopControllers;
+var
+  Locator, Service, List, P: Variant;
+  I: Integer;
+  Exe, Cmd, Mine, Old: String;
+begin
+  Mine := Lowercase(RemoveBackslash(ExpandConstant('{app}')));
+  Old := Lowercase(OldDir);
+  try
+    Locator := CreateOleObject('WbemScripting.SWbemLocator');
+    Service := Locator.ConnectServer('.', 'root\cimv2');
+    List := Service.ExecQuery('SELECT * FROM Win32_Process WHERE Name = ''controller.exe''');
+    for I := 0 to List.Count - 1 do begin
+      P := List.ItemIndex(I);
+      if VarIsNull(P.ExecutablePath) then Continue;
+      Exe := P.ExecutablePath;
+      Exe := Lowercase(Exe);
+      if (Pos(Mine, Exe) <> 1) and (Pos(Old, Exe) <> 1) then Continue;
+      Cmd := '';
+      if not VarIsNull(P.CommandLine) then Cmd := P.CommandLine;
+      Cmd := Lowercase(Cmd);
+      if (Pos(' watchdog', Cmd) > 0) or (Pos(' mcp', Cmd) > 0) or (Pos(' assist', Cmd) > 0) then Continue;
+      P.Terminate;
+    end;
+  except
+    Log('Não consegui listar os processos do controlador.');
+  end;
+  Sleep(800);
 end;
 
 function InitializeSetup: Boolean;
@@ -109,10 +169,17 @@ end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
-  if CurStep = ssInstall then
-    RunHelper('Antes')
-  else if CurStep = ssPostInstall then
-    RunHelper('Depois');
+  if CurStep = ssInstall then begin
+    StopControllers;
+    Sweep(ExpandConstant('{app}'), 0);
+    Sweep(ExpandConstant('{app}'), 1);
+  end else if CurStep = ssPostInstall then begin
+    Sweep(ExpandConstant('{app}'), 0);
+    // Tira a pasta da versão anterior sem deixar uma DLL que o OBS ainda carregue.
+    Sweep(OldDir, 0);
+    Sweep(OldDir, 1);
+    DelTree(OldDir, True, True, True);
+  end;
 end;
 
 function InitializeUninstall: Boolean;
