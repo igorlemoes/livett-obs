@@ -25,7 +25,7 @@ import (
 )
 
 // BridgeName must match the name defined by assets/panel_browser.js (guarded by a test).
-const BridgeName = "__tiktokPanelV10"
+const BridgeName = "__tiktokPanelV11"
 
 // signInURL is TikTok's own sign-in page in modal form: only the sign-in box, without the home feed.
 const signInURL = "https://www.tiktok.com/login?is_modal=1&hide_toggle_login_signup=1&lang=pt-BR"

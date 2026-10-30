@@ -21,7 +21,7 @@ func TestEmbeddedPanelAndBridgeArePresent(t *testing.T) {
 		t.Error("the panel page must carry the token placeholder the server replaces")
 	}
 	js := PanelJS()
-	if !strings.Contains(js, "__tiktokPanelV10") || len(js) < 1000 {
+	if !strings.Contains(js, "__tiktokPanelV11") || len(js) < 1000 {
 		t.Error("the browser bridge script is missing or incomplete")
 	}
 }

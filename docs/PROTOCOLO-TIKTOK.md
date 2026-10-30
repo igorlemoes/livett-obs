@@ -9,7 +9,7 @@ Nada aqui autoriza falsificar assinaturas, identificadores de dispositivo ou arq
 ## 1. Como as chamadas são feitas
 
 Todas saem **de dentro do Chrome gerenciado**, de uma aba no domínio do serviço de LIVE, com os cookies da sessão do usuário (`credentials: 'include'`); o controlador nunca
-exporta nem registra cookies. O script `panel_browser.js` define a ponte (`window.__tiktokPanelV10`) e envia o corpo
+exporta nem registra cookies. O script `panel_browser.js` define a ponte (`window.__tiktokPanelV11`) e envia o corpo
 assinado como o serviço espera (um resumo MD5 do corpo). Respostas: JSON com `status_code` (0 = ok); a área de dados pode trazer `prompts` com o texto do erro.
 
 Códigos vistos: `0` ok · `20003` sessão inválida ou ausente · `4014257` "precisa atualizar" · `4003150` tolerado no ping de manutenção · `4003` recusa de criação.

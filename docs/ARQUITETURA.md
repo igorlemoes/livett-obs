@@ -47,7 +47,7 @@ Ideias centrais:
 | Pacote | Responsabilidade | Observações |
 | --- | --- | --- |
 | `controller` | **Máquina de estados** da LIVE: conectar, iniciar, encerrar, recuperação, agendamento, monitor, chat, autopilot, "Sobre mim", observador de login | O coração; dependências por interface (`Browser`, `Obs`, `Recorder`) → testes com fakes |
-| `session` | Ponte CDP com o Chrome: iniciar/anexar, aba de serviço, injeção do script, janelas escondidas, cópia da sessão, login em janela enxuta com ticket PKCE, cookies e identidade das contas, operações da aba de login | `BridgeName` = `__tiktokPanelV10` |
+| `session` | Ponte CDP com o Chrome: iniciar/anexar, aba de serviço, injeção do script, janelas escondidas, cópia da sessão, login em janela enxuta com ticket PKCE, cookies e identidade das contas, operações da aba de login | `BridgeName` = `__tiktokPanelV11` |
 | `chrome` | Perfil persistente, localizar/iniciar/fechar o Chrome, `DevToolsActivePort` | Só perfis permitidos |
 | `winhide` | Esconder/mostrar janelas do Chrome (Win32), achar o PID do navegador | `SW_HIDE` |
 | `obs` | Cliente HTTP da API do plugin (mesmos nomes de pedido do obs-websocket) + `StreamOutput` (para só a saída ligada ao perfil/destino da LIVE) | Nunca chama `GetOutputList` |
@@ -195,6 +195,6 @@ celular (phone.html/js) --HTTPS--> [túnel Cloudflare | rede local :8766-8775] -
 - **Go sem dependências externas**: WebSocket, protobuf mínimo e HTTP feitos à mão ou pela biblioteca padrão; um único `.exe` (~7,6 MB), sem interpretador.
 - **Janela do Chrome**: escondida com `SW_HIDE` (um Chrome totalmente escondido para de desenhar: capturas de tela travam; fora da tela + estilo tool-window desenha).
   Hoje só o login a traz à frente, e ela some ao logar.
-- **`panel_browser.js` é versionado pelo nome do objeto** (`__tiktokPanelV10`): ao mudar o script, suba o número, porque a aba mantém o objeto antigo; um teste garante que script e Go usam o mesmo nome.
+- **`panel_browser.js` é versionado pelo nome do objeto** (`__tiktokPanelV11`): ao mudar o script, suba o número, porque a aba mantém o objeto antigo; um teste garante que script e Go usam o mesmo nome.
 - **Conectar nunca publica.** Publicação só por `Start`, com `Confirmed`.
 - **Identidade honesta**: parâmetros do app 1.38.0 e `x-ss-stub` (MD5 do corpo), sem `device_id`/`install_id`, sem assinaturas.

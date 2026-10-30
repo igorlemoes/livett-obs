@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 
 	"tiktoklive/internal/assets"
@@ -51,7 +52,29 @@ func main() {
 	fmt.Println("TikTok check:", string(raw), err)
 	if continueOnly {
 		last, err := s.Call(ctx, "cont", nil)
+		if m, ok := last.(map[string]any); ok {
+			printContinue(root, m)
+			delete(m, "ids") // never print ids
+			delete(m, "roomKeys")
+		}
 		raw, _ = json.Marshal(last)
 		fmt.Println("TikTok room/continue:", string(raw), err)
+	}
+}
+
+// printContinue compares the room the service reports with the journal of the panel, printing only equal/different.
+func printContinue(root string, m map[string]any) {
+	ids, _ := m["ids"].(map[string]any)
+	raw, err := os.ReadFile(filepath.Join(root, "runtime", "broadcast.json"))
+	if err != nil {
+		fmt.Println("journal: not readable")
+		return
+	}
+	var j struct {
+		Binding map[string]any `json:"binding"`
+	}
+	json.Unmarshal(raw, &j)
+	for _, k := range [][2]string{{"room", "room_id"}, {"ping", "ping_room_id"}, {"stream", "stream_id"}} {
+		fmt.Println("same", k[0], "id as the panel journal:", ids[k[0]] != nil && ids[k[0]] == j.Binding[k[1]])
 	}
 }
