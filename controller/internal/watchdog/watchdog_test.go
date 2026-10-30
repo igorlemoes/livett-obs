@@ -51,8 +51,10 @@ func (f *fakeObs) Call(_ context.Context, name string, data map[string]any) (map
 }
 
 type fakeBrowser struct {
-	ended bool
-	calls []string
+	ended      bool
+	endedAfter int // when > 0: the room only reads as ended from this verification on
+	verifies   int
+	calls      []string
 }
 
 func (f *fakeBrowser) Call(_ context.Context, method string, data any) (any, error) {
@@ -64,7 +66,8 @@ func (f *fakeBrowser) Call(_ context.Context, method string, data any) (any, err
 	}
 	f.calls = append(f.calls, method+":"+status)
 	if method == "verify" {
-		return Obj{"ended": f.ended}, nil
+		f.verifies++
+		return Obj{"ended": f.ended || (f.endedAfter > 0 && f.verifies >= f.endedAfter)}, nil
 	}
 	return Obj{"code": float64(0)}, nil
 }
@@ -105,6 +108,7 @@ func (r *rig) dog(obs *fakeObs, browser *fakeBrowser) *Watchdog {
 			return browser, nil
 		})
 	w.Clock = func() time.Time { return r.now }
+	w.RoomRetryEvery = time.Millisecond
 	w.StaleAfter = 15 * time.Second
 	w.Alive = func(int) bool { return r.pidUp }
 	return w
@@ -186,6 +190,19 @@ func TestUnconfirmedRoomOrMissingBrowserLeavesUncertain(t *testing.T) {
 	r.journal("live")
 	if result := r.dog(newObs(), nil).Act(context.Background()); result["room"] != "browser_unavailable" {
 		t.Fatalf("%v", result)
+	}
+}
+
+func TestTheRoomIsEndedAndConfirmedEvenWhenTheFirstAttemptsDoNotShowIt(t *testing.T) {
+	r := newRig(t)
+	r.journal("live")
+	browser := &fakeBrowser{endedAfter: 4}
+	result := r.dog(newObs(), browser).Act(context.Background())
+	if result["room"] != "ended" || browser.verifies != 4 {
+		t.Fatalf("%v verifies=%d", result, browser.verifies)
+	}
+	if read(filepath.Join(r.root, "runtime", "broadcast.json"))["phase"] != "closed" {
+		t.Fatal("journal must close")
 	}
 }
 

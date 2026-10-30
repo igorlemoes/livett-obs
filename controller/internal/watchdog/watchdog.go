@@ -53,11 +53,13 @@ type Watchdog struct {
 	StaleAfter     time.Duration
 	Alive          func(pid int) bool
 	PollEvery      time.Duration
+	RoomAttempts   int           // tries to end and confirm the room
+	RoomRetryEvery time.Duration // pause between those tries
 }
 
 func New(root string, obsFactory func(context.Context) (Obs, error), browserFactory func(context.Context) (Browser, error)) *Watchdog {
 	return &Watchdog{Root: root, ObsFactory: obsFactory, BrowserFactory: browserFactory, Clock: time.Now,
-		StaleAfter: StaleAfter, Alive: PidAlive, PollEvery: Poll}
+		StaleAfter: StaleAfter, Alive: PidAlive, PollEvery: Poll, RoomAttempts: 6, RoomRetryEvery: 5 * time.Second}
 }
 
 func (w *Watchdog) journal() string   { return filepath.Join(w.Root, "runtime", "broadcast.json") }
@@ -251,15 +253,32 @@ func (w *Watchdog) endRoom(ctx context.Context, data Obj) Obj {
 		return Obj{"room": "browser_unavailable"}
 	}
 	binding := data["binding"]
-	browser.Call(ctx, "ping", Obj{"binding": binding, "status": 4}) // the response may be lost; verification decides
-	verified, err := browser.Call(ctx, "verify", binding)
-	if err != nil {
-		return Obj{"room": "error"}
+	// A single attempt is not enough: the request may be lost or the service slow right when the panel dies.
+	result := Obj{"room": "not_confirmed"}
+	attempts := w.RoomAttempts
+	if attempts < 1 {
+		attempts = 1
 	}
-	if m, ok := verified.(map[string]any); ok && m["ended"] == true {
-		return Obj{"room": "ended"}
+	for attempt := 0; attempt < attempts; attempt++ {
+		if attempt > 0 {
+			select {
+			case <-time.After(w.RoomRetryEvery):
+			case <-ctx.Done():
+				return result
+			}
+		}
+		browser.Call(ctx, "ping", Obj{"binding": binding, "status": 4}) // the response may be lost; verification decides
+		verified, err := browser.Call(ctx, "verify", binding)
+		if err != nil {
+			result = Obj{"room": "error"}
+			continue
+		}
+		if m, ok := verified.(map[string]any); ok && m["ended"] == true {
+			return Obj{"room": "ended"}
+		}
+		result = Obj{"room": "not_confirmed"}
 	}
-	return Obj{"room": "not_confirmed"}
+	return result
 }
 
 // Act stops our OBS output and ends the room, independently and at once, then records the outcome.

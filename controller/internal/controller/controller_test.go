@@ -428,6 +428,46 @@ func TestRemoteNotEndedRemainsUncertainAndBlocksNewCreate(t *testing.T) {
 	expectPanelError(t, err, "start after uncertain")
 }
 
+func recoveredAfterCrash(e *env) *Controller {
+	e.browser.mu.Lock()
+	e.browser.ended = false // the room is still open on TikTok
+	e.browser.mu.Unlock()
+	return New(Options{Root: e.root, Browser: e.browser, ObsFactory: func(context.Context) (Obs, error) { return e.obs, nil }})
+}
+
+func TestConnectEndsAGhostRoomWhenTheObsOutputIsIdle(t *testing.T) {
+	e := newEnv(t, nil)
+	e.mustStart()
+	e.obs.setActive(false) // the panel died and the OBS output stopped, but the room stayed open
+	fresh := recoveredAfterCrash(e)
+	if fresh.Phase() != Recovery {
+		t.Fatalf("%v", fresh.Phase())
+	}
+	before := e.browser.count("ping")
+	if _, err := fresh.Connect(ctx()); err != nil {
+		t.Fatal(err)
+	}
+	if e.browser.count("ping") <= before {
+		t.Fatal("the leftover room must be asked to end")
+	}
+	if fresh.Phase() == Recovery {
+		t.Fatalf("recovery must not stay latched silently: %v", fresh.Phase())
+	}
+}
+
+func TestConnectLeavesARoomAloneWhileTheObsOutputIsStillRunning(t *testing.T) {
+	e := newEnv(t, nil)
+	e.mustStart() // OBS keeps streaming
+	fresh := recoveredAfterCrash(e)
+	before := e.browser.count("ping")
+	if _, err := fresh.Connect(ctx()); err != nil {
+		t.Fatal(err)
+	}
+	if e.browser.count("ping") != before || e.obs.has("StopStream") && !e.obs.active {
+		t.Fatal("a stream that is still running must not be ended by a reconnect")
+	}
+}
+
 func TestCrashDuringCreationPersistsRecoveryLatch(t *testing.T) {
 	e := newEnv(t, nil)
 	e.browser.failCreate = true

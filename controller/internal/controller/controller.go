@@ -392,6 +392,10 @@ func (c *Controller) obsString(key string) string {
 
 // ---- connect
 
+// accountBusyDetail explains the "account is live but this panel owns no room" case: another device, an app or a room left open.
+const accountBusyDetail = "Esta conta aparece ao vivo no TikTok, mas essa LIVE não é controlada por este painel (outro dispositivo, outro aplicativo ou uma sala que ficou aberta). " +
+	"Encerre essa LIVE onde ela foi aberta e clique em Conectar novamente."
+
 // Connect reads OBS and the TikTok session without publishing or changing anything.
 func (c *Controller) Connect(ctx context.Context) (Obj, error) {
 	c.mu.Lock()
@@ -403,7 +407,8 @@ func (c *Controller) Connect(ctx context.Context) (Obj, error) {
 	if err := c.connectObs(ctx); err != nil {
 		return nil, err
 	}
-	if _, err := c.readObs(ctx); err != nil {
+	obsStatus, err := c.readObs(ctx)
+	if err != nil {
 		return nil, err
 	}
 	if c.getPhase() != Live {
@@ -445,7 +450,9 @@ func (c *Controller) Connect(ctx context.Context) (Obj, error) {
 	c.st.Unlock()
 	switch {
 	case phase != Recovery && phase != Uncertain && !hasBinding:
-		if isZero(account["code"]) {
+		if isZero(account["code"]) && !isInt(account["liveStatus"], 4) {
+			c.setState(Ready, accountBusyDetail)
+		} else if isZero(account["code"]) {
 			c.setState(Ready, "Conectado. Confira a cena, o áudio e o título antes de iniciar.")
 		} else {
 			// The TikTok session is not valid (e.g. 20003 after it expired): not ready to publish.
@@ -460,6 +467,10 @@ func (c *Controller) Connect(ctx context.Context) (Obj, error) {
 		if isTrue(asObj(verified)["ended"]) {
 			c.setState(Closed, "A sala anterior está encerrada. Confira também a saída do OBS.")
 			c.save()
+		} else if (phase == Recovery || phase == Uncertain) && !outputBusy(obsStatus) {
+			// A room of ours that is still open while the OBS output is idle is a ghost (the panel or the watchdog
+			// could not close it earlier): there is no media behind it, so finish what the watchdog started.
+			return c.endLocked(ctx)
 		}
 	}
 	return c.Snapshot(), nil
@@ -565,6 +576,9 @@ func (c *Controller) Start(ctx context.Context, req StartRequest) (snapshot Obj,
 	c.st.Unlock()
 	c.readAboutMe(ctx)
 	if !isZero(account["code"]) || !isInt(account["liveStatus"], 4) || !isTrue(account["enabled"]) || account["banned"] != false {
+		if isZero(account["code"]) && !isInt(account["liveStatus"], 4) && c.binding == nil {
+			return nil, perr(accountBusyDetail)
+		}
 		return nil, perr("O TikTok não confirmou que a conta está livre e habilitada para criar uma sala.")
 	}
 	if c.binding != nil {
