@@ -30,7 +30,7 @@
   }
 
   if(location.origin!=='https://webcast.tiktokv.com') throw Error('Wrong service origin');
-  if(window.__tiktokPanelV9) return {ready:true};
+  if(window.__tiktokPanelV10) return {ready:true};
   const common={aid:'8311',live_studio:'1',app_name:'tiktok_live_studio',channel:'studio',
     version_code:'1.38.0',webcast_sdk_version:'1380',device_platform:'windows',live_mode:'6',
     language:'en',app_language:'en',webcast_language:'en',timezone_name:Intl.DateTimeFormat().resolvedOptions().timeZone};
@@ -79,6 +79,15 @@
     return {code:b.status_code,matches:room?.id_str===binding.room_id,
       status:Number.isInteger(room?.status)?room.status:null,
       ended:b.status_code===0&&room?.id_str===binding.room_id&&room.status===4};
+  };
+  // Read-only: what the service says about the account's last room. Only shapes and counts leave the page (no ids, no stream data).
+  const cont=async()=>{
+    const b=await request('/webcast/room/continue/');
+    const room=b.data?.room??null;
+    return {code:b.status_code,hasRoom:!!room,status:Number.isInteger(room?.status)?room.status:null,
+      dataKeys:b.data&&typeof b.data==='object'?Object.keys(b.data).slice(0,40):[],roomKeys:room?Object.keys(room).slice(0,120):[],
+      hasIdStr:typeof room?.id_str==='string',hasStreamId:typeof room?.stream_id_str==='string',
+      hasLivingAttrs:typeof room?.living_room_attrs?.room_id_str==='string',prompts:Array.isArray(b.data?.prompts)?b.data.prompts.length:0};
   };
   // Read-only observation: full room/info and create_info bodies for diffing.
   const probe=async(binding)=>{
@@ -170,7 +179,7 @@
     if(owned){delete owned.stream_url;delete owned.multi_stream_url;}
     owned=null;requested=false;return {cleared:true};
   };
-  Object.defineProperty(window,'__tiktokPanelV9',{value:{check,create,ping,verify,drop,probe,imfetch,aboutme,aboutmesave,roomstats,chat,pkce,profile}});
+  Object.defineProperty(window,'__tiktokPanelV10',{value:{check,create,ping,verify,drop,probe,cont,imfetch,aboutme,aboutmesave,roomstats,chat,pkce,profile}});
   return {ready:true};
 
 })();

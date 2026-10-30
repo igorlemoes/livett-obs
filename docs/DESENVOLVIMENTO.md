@@ -49,7 +49,7 @@ documente em [MCP.md](MCP.md). Ferramentas que publicam, enviam mensagens públi
 
 **Adicionar um campo ao painel**: `controller.snapshotLocked` → `web` (`internal/assets/web/*`); o painel é embutido, então basta recompilar.
 
-**Mudar o script do navegador** (`internal/assets/panel_browser.js`): **suba o número** do objeto (`__tiktokPanelV9` → `V10`) no script **e** em `session.BridgeName`, porque a aba do Chrome mantém o
+**Mudar o script do navegador** (`internal/assets/panel_browser.js`): **suba o número** do objeto (`__tiktokPanelV10` → `V11`) no script **e** em `session.BridgeName`, porque a aba do Chrome mantém o
 objeto antigo; o teste `TestBridgeNameMatchesThePanelScript` falha se divergirem. Novas operações entram em `allowedOps` (`session.go`).
 
 **Novo decodificador de mensagem IM**: `internal/wire` (limites de tamanho, erro em dado malformado) + tratamento em `controller/view.go` (`ingestLocked`); teste com bytes fixos.

@@ -2,7 +2,8 @@
 // Copyright (C) 2026 Igor Lemões
 
 // transportcheck exercises the Go transport against the real OBS and the managed Chrome, read-only:
-// it asks OBS for its version/scene and runs the panel script's `check` (GET create_info). It never starts a LIVE.
+// it asks OBS for its version/scene and runs the panel script's `check` (GET create_info). With the argument `continue` it also reads
+// GET room/continue (the account's last room) and prints only its shape, never ids. It never starts a LIVE.
 package main
 
 import (
@@ -22,18 +23,21 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
 	defer cancel()
 
-	client, err := obs.Open(ctx)
-	if err != nil {
+	continueOnly := len(os.Args) > 2 && os.Args[2] == "continue"
+	if client, err := obs.Open(ctx); err != nil {
 		fmt.Println("OBS:", err)
-		os.Exit(1)
+		if !continueOnly {
+			os.Exit(1)
+		}
+	} else {
+		defer client.Close()
+		version, err := client.Call(ctx, "GetVersion", nil)
+		fmt.Println("OBS version:", version["obsVersion"], "ws:", version["obsWebSocketVersion"], err)
+		scene, err := client.Call(ctx, "GetCurrentProgramScene", nil)
+		fmt.Println("OBS scene:", scene["currentProgramSceneName"], err)
+		stream, err := client.Call(ctx, "GetStreamStatus", nil)
+		fmt.Println("OBS streaming:", stream["outputActive"], err)
 	}
-	defer client.Close()
-	version, err := client.Call(ctx, "GetVersion", nil)
-	fmt.Println("OBS version:", version["obsVersion"], "ws:", version["obsWebSocketVersion"], err)
-	scene, err := client.Call(ctx, "GetCurrentProgramScene", nil)
-	fmt.Println("OBS scene:", scene["currentProgramSceneName"], err)
-	stream, err := client.Call(ctx, "GetStreamStatus", nil)
-	fmt.Println("OBS streaming:", stream["outputActive"], err)
 
 	s := session.New(root)
 	defer s.Stop()
@@ -45,4 +49,9 @@ func main() {
 	result, err := s.Call(ctx, "check", nil)
 	raw, _ := json.Marshal(result)
 	fmt.Println("TikTok check:", string(raw), err)
+	if continueOnly {
+		last, err := s.Call(ctx, "cont", nil)
+		raw, _ = json.Marshal(last)
+		fmt.Println("TikTok room/continue:", string(raw), err)
+	}
 }

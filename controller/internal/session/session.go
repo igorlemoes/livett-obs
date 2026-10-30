@@ -25,7 +25,7 @@ import (
 )
 
 // BridgeName must match the name defined by assets/panel_browser.js (guarded by a test).
-const BridgeName = "__tiktokPanelV9"
+const BridgeName = "__tiktokPanelV10"
 
 // signInURL is TikTok's own sign-in page in modal form: only the sign-in box, without the home feed.
 const signInURL = "https://www.tiktok.com/login?is_modal=1&hide_toggle_login_signup=1&lang=pt-BR"
@@ -38,7 +38,7 @@ func (e *Error) Error() string { return e.Msg }
 
 func fail(msg string) error { return &Error{msg} }
 
-var allowedOps = map[string]bool{"check": true, "create": true, "ping": true, "verify": true, "drop": true, "probe": true,
+var allowedOps = map[string]bool{"check": true, "create": true, "ping": true, "verify": true, "drop": true, "probe": true, "cont": true,
 	"imfetch": true, "aboutme": true, "aboutmesave": true, "roomstats": true, "chat": true, "pkce": true, "profile": true}
 
 // Page is a Chrome target as listed by /json/list.
