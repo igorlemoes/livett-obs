@@ -13,6 +13,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 	"time"
 )
@@ -124,10 +125,17 @@ func TestStopThatNeverGoesIdleIsNotConfirmed(t *testing.T) {
 // ---- the HTTP client against a fake of the plugin's API
 
 type fakeAPI struct {
+	mu       sync.Mutex // guards requests: the server goroutine appends while the test reads
 	server   *httptest.Server
 	token    string
 	requests []string
 	handler  func(request string, data map[string]any) (int, map[string]any)
+}
+
+func (f *fakeAPI) requestCount() int {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return len(f.requests)
 }
 
 func newAPI(t *testing.T) (*fakeAPI, string) {
@@ -151,7 +159,9 @@ func newAPIAt(t *testing.T, path, token string) *fakeAPI {
 			Data    map[string]any `json:"data"`
 		}
 		json.NewDecoder(r.Body).Decode(&req)
+		f.mu.Lock()
 		f.requests = append(f.requests, req.Request)
+		f.mu.Unlock()
 		status, body := 200, map[string]any{}
 		if f.handler != nil {
 			status, body = f.handler(req.Request, req.Data)
@@ -299,10 +309,10 @@ func TestATimeoutIsNeverRetried(t *testing.T) {
 		time.Sleep(400 * time.Millisecond)
 		return 200, map[string]any{}
 	}
-	before := len(f.requests)
+	before := f.requestCount()
 	c.Call(context.Background(), "StartStream", nil)
 	time.Sleep(600 * time.Millisecond)
-	if n := len(f.requests) - before; n != 1 {
+	if n := f.requestCount() - before; n != 1 {
 		t.Fatalf("StartStream was sent %d times; a timeout has an unknown outcome and must not be repeated", n)
 	}
 }
